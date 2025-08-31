@@ -1,41 +1,59 @@
 'use client'
 
-import Player from '../components/player.js'
-import { useState } from 'react'
 
-const sampleMovies = [
-  { id: 1, title: ' Movie 1', src: '/videos/sample1.m3u8' },
-  { id: 2, title: ' Movie 2', src: '/videos/sample2.m3u8' },
-  { id: 3, title: ' Movie 3', src: '/videos/sample2.m3u8' }
-]
+import Player from '../components/player'
+import { useEffect, useState } from "react"
 
 export default function Home() {
-  const [current, setCurrent] = useState(sampleMovies[0])
+  const [movies, setMovies] = useState([])
+  const [current, setCurrent] = useState(null)
+
+  // Load movies from backend
+  useEffect(() => {
+    async function fetchMovies() {
+      try {
+        const res = await fetch("/api/movies", { cache: "no-store" })
+        const data = await res.json()
+        setMovies(data)
+        if (data.length > 0) setCurrent(data[0])
+      } catch (err) {
+        console.error("Failed to load movies:", err)
+      }
+    }
+    fetchMovies()
+  }, [])
+
+  if (!current) return <p className="text-silver p-6">Loading movies...</p>
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
-        {sampleMovies.map(movie => (
-          <div 
-            key={movie.id} 
+    <main className="p-6 space-y-6 bg-black min-h-screen text-silver">
+      <h1 className="text-3xl font-bold">🎬 My Streaming App</h1>
+
+      {/* Movie Selector */}
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {movies.map(movie => (
+          <div
+            key={movie.id}
             onClick={() => setCurrent(movie)}
-            style={{
-              padding: '1rem',
-              cursor: 'pointer',
-              backgroundColor: '#1a1a1a',
-              border: movie.id === current.id ? '2px solid #c0c0c0' : '1px solid #555',
-              borderRadius: '8px',
-              flex: '1'
-            }}
+            className={`cursor-pointer px-4 py-2 rounded-xl transition 
+              ${current.id === movie.id 
+                ? "bg-silver text-black font-bold" 
+                : "bg-black/60 border border-silver/40 hover:bg-silver/20"
+              }`}
           >
             {movie.title}
           </div>
         ))}
       </div>
 
-      <div style={{ backgroundColor: '#000', padding: '1rem', borderRadius: '8px' }}>
+      {/* Current Movie Player */}
+      <div className="bg-black/80 p-4 rounded-2xl shadow-xl">
+        <h2 className="text-2xl font-semibold mb-2">{current.title}</h2>
+        {current.description && (
+          <p className="mb-4 text-sm text-silver/70">{current.description}</p>
+        )}
         <Player src={current.src} />
       </div>
-    </div>
+    </main>
   )
 }

@@ -1,28 +1,25 @@
 'use client'
-
 import { useEffect, useRef } from 'react'
 import Hls from 'hls.js'
 
 export default function Player({ src }) {
-  const ref = useRef(null)
+  const videoRef = useRef(null)
 
   useEffect(() => {
-    if(Hls.isSupported()) {
+    if (Hls.isSupported()) {
       const hls = new Hls()
       hls.loadSource(src)
-      hls.attachMedia(ref.current)
-      return () => { hls.destroy() }
-    } else if (ref.current.canPlayType('application/vnd.apple.mpegurl')) {
-      ref.current.src = src
+      hls.attachMedia(videoRef.current)
+    } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+      videoRef.current.src = src
     }
   }, [src])
 
   return (
     <video
-      ref={ref}
+      ref={videoRef}
       controls
-      autoPlay
-      style={{ width: '100%', borderRadius: '8px', backgroundColor: '#000' }}
+      className="w-full rounded-2xl border border-silver shadow-lg"
     />
   )
 }
