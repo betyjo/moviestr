@@ -1,78 +1,40 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db"; // make sure src/lib/db.js exists
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/nextauthOptions";
 
-// GET /api/movies?q=&genre=
-export async function GET(req) {
-  try {
-    const url = new URL(req.url);
-    const q = url.searchParams.get("q") || undefined;
-    const genre = url.searchParams.get("genre") || undefined;
-
-    const where = {};
-    if (q) {
-      where.OR = [
-        { title: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-      ];
-    }
-    if (genre) {
-      where.genres = { some: { genre: { name: genre } } };
-    }
-
-    const movies = await prisma.movie.findMany({
-      where,
-      include: { genres: { include: { genre: true } }, assets: true },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return NextResponse.json({ data: movies });
-  } catch (err) {
-    console.error("Movies API error:", err);
-    return NextResponse.json({ data: [], error: "Failed to fetch movies" }, { status: 500 });
-  }
+export async function GET(req, { params }) {
+  const data = await prisma.movie.findUnique({ where: { id: params.id }, include: { genres: true } });
+  if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(data);
 }
 
-// POST /api/movies
-export async function POST(req) {
-  try {
-    const body = await req.json();
-    const { title, description, year, durationSec, posterUrl, backdropUrl, trailerUrl, genreNames = [] } = body;
+export async function PATCH(req, { params }) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const body = await req.json();
+  const update = {};
+  if (body.title) update.title = body.title;
+  if (body.overview) update.overview = body.overview;
+  if (body.posterUrl) update.posterUrl = body.posterUrl;
+  if (body.releaseDate) update.releaseDate = new Date(body.releaseDate);
+  if (body.imdbRating !== undefined) update.imdbRating = Number(body.imdbRating);
+  if (body.isSeries !== undefined) update.isSeries = !!body.isSeries;
+  if (body.popular !== undefined) update.popular = !!body.popular;
+  if (body.trailerKey !== undefined) update.trailerKey = body.trailerKey;
+  if (body.downloadUrl !== undefined) update.downloadUrl = body.downloadUrl;
 
-    // Upsert genres
-    const connectGenres = await Promise.all(
-      genreNames.map(async (g) => {
-        const found = await prisma.genre.upsert({
-          where: { name: g },
-          update: {},
-          create: { name: g },
-        });
-        return { genreId: found.id };
-      })
-    );
-
-    const movie = await prisma.movie.create({
-      data: {
-        title,
-        slug: slugify(title),
-        description,
-        year,
-        durationSec,
-        posterUrl,
-        backdropUrl,
-        trailerUrl,
-        genres: {
-          create: connectGenres,
-        },
-      },
-    });
-
-    return NextResponse.json(movie, { status: 201 });
-  } catch (err) {
-    console.error("Movies POST error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  if (body.genres) {
+    update.genres = { set: [], connect: body.genres.map(slug => ({ slug })) };
   }
+
+  const data = await prisma.movie.update({ where: { id: params.id }, data, include: { genres: true } });
+  return NextResponse.json(data);
 }
 
-function slugify(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+export async function DELETE(req, { params }) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  await prisma.movie.delete({ where: { id: params.id } });
+  return NextResponse.json({ ok: true });
 }
