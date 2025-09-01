@@ -1,34 +1,40 @@
-export const metadata = {
-  title: 'Movie Streamer',
-  description: 'Stream your movies fast and clean',
-}
+import './globals.css'
+
+export const metadata = { title: "Moviestr", description: "Stream movies" }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body style={{
-        margin: 0,
-        fontFamily: "'Segoe UI', sans-serif",
-        backgroundColor: '#0d0d0d', // black
-        color: '#c0c0c0' // silver
-      }}>
-        <header style={{
-          padding: '1rem 2rem',
-          backgroundColor: '#1a1a1a',
-          borderBottom: '1px solid #555',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h1 style={{ margin: 0 }}>🎬 Movie Streamer</h1>
-          <nav>
-            <a href="/" style={{ marginRight: '1rem', color: '#c0c0c0', textDecoration: 'none' }}>Home</a>
-            <a href="/upload" style={{ color: '#c0c0c0', textDecoration: 'none' }}>Upload</a>
-          </nav>
-        </header>
-        <main style={{ padding: '2rem' }}>
-          {children}
-        </main>
+      <body className="min-h-screen bg-black text-silver relative overflow-x-hidden">
+        {/* Layer 1: big blurred backdrop (low opacity) */}
+        <div id="backdrop-layer" className="fixed inset-0 -z-10 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80"></div>
+          {/* placeholder for backdrop image */}
+          <div id="backdrop-image" className="absolute inset-0 bg-[url('/placeholders/backdrop.jpg')] bg-center bg-cover blur-[30px] opacity-40 transform scale-105"></div>
+        </div>
+
+        {/* Layer 2: poster grid blur/overlay (subtle parallax) */}
+        <div id="poster-layer" className="fixed inset-0 -z-20 pointer-events-none">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/40 to-transparent"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4">
+          <header className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
+              <div className="text-2xl font-bold">⚡ MovieStreamin </div>
+              <div className="px-3 py-1 rounded-lg bg-black/40 border border-silver/20 text-sm"> </div>
+            </div>
+            <nav className="flex items-center gap-3">
+              <a href="/" className="text-silver hover:text-white">Home</a>
+              <a href="/upload" className="text-silver hover:text-white">Upload</a>
+              <a href="/admin" className="text-silver hover:text-white">Admin</a>
+            </nav>
+          </header>
+
+          <main>{children}</main>
+
+          <footer className="py-12 text-center text-sm text-silver/60">© {new Date().getFullYear()}MovieStream</footer>
+        </div>
       </body>
     </html>
   )

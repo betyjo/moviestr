@@ -7,10 +7,111 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String            @id @default(cuid())
+  email        String            @unique
+  name         String?
+  passwordHash String?
+  role         Role              @default(USER)
+  createdAt    DateTime          @default(now())
+  watchlist    WatchList?
+  playback     PlaybackSession[]
+}
+
+model Genre {
+  id     String       @id @default(cuid())
+  name   String       @unique
+  movies MovieGenre[]
+}
+
 model Movie {
-  id        String   @id @default(cuid())
-  title     String
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
   description String?
-  src       String   // HLS master.m3u8 path
+  year        Int?
+  durationSec Int?
+  published   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  assets      Asset[]
+  genres      MovieGenre[]
+  subtitles   Subtitle[]
+  // caching quick fields
+  posterUrl   String?
+  backdropUrl String?
+  trailerUrl  String? // short trailer HLS or mp4
+  previewUrl  String? // short preview (GIF or HLS)
+
+  // opposite relations
+  watchlists WatchList[]       @relation("WatchMovies")
+  sessions   PlaybackSession[]
+}
+
+model MovieGenre {
+  id      String @id @default(cuid())
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId String
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+  genreId String
+
+  @@unique([movieId, genreId])
+}
+
+model Asset {
+  id        String    @id @default(cuid())
+  movie     Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId   String
+  type      AssetType
+  path      String // S3 key or public CDN path
+  bitrate   Int?
+  width     Int?
+  height    Int?
+  codec     String?
+  createdAt DateTime  @default(now())
+}
+
+enum AssetType {
+  RAW
+  HLS_MASTER
+  HLS_VARIANT
+  TRAILER
+  POSTER
+  BACKDROP
+  PREVIEW_GIF
+  SUBTITLE
+}
+
+model Subtitle {
+  id      String @id @default(cuid())
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId String
+  lang    String
+  label   String
+  path    String
+}
+
+model WatchList {
+  id     String  @id @default(cuid())
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String  @unique
+  movies Movie[] @relation("WatchMovies")
+}
+
+model PlaybackSession {
+  id        String   @id @default(cuid())
+  userId    String
+  movieId   String
+  positionS Int      @default(0)
+  updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  movie     Movie    @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])
 }

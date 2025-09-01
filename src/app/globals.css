@@ -1,14 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-body::-webkit-scrollbar {
-  width: 8px;
+:root {
+  --silver: #c0c0c0;
+  --dark: #0b0b0b;
 }
-body::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 4px;
-}
-a:hover {
-  color: #fff;
-}
+
+/* custom */
+body { background: linear-gradient(180deg,#050505 0%, #070707 100%); color:var(--silver);}
+.text-silver { color: var(--silver); }
+.bg-silver { background-color: var(--silver); color: #000; }
+
+.scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
