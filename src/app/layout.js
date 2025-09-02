@@ -1,7 +1,7 @@
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 
-export const metadata = { title: "MovieStudio", description: "Silver/black streaming" };
+export const metadata = { title: "MovieStudio", description: "All your favourite movies are presented, action, romance all the " };
 
 export default function RootLayout({ children }) {
   return (
