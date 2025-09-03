@@ -1,4 +1,4 @@
-// simple server-side auth helper that reads the next-auth session
+
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./nextauthOptions"; // we'll create this file next
 

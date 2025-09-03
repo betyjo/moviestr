@@ -3,8 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 
-// This is the core authentication API route using NextAuth.js.
-// It handles user sign-in and session management.
 const authOptions = {
   // Use CredentialsProvider for email/password login.
   providers: [
