@@ -1,7 +1,7 @@
 "use client";
 
-import Footer from "@/components/Footer"; // relative path
-import LatestMovies from "@/components/LatestMovies"; // relative path
+import Footer from "../components/Footer";
+import LatestMovies from "../components/LatestMovies";
 
 export default function Home() {
   return (

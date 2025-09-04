@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "./Logo";
+import Logo from "./logo";
 
 const GENRES = [
   "action",

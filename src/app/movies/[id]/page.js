@@ -1,13 +1,10 @@
-"use client";
-
-import { notFound } from "next/navigation";
 import Footer from "../../components/Footer"; 
-import { latestmovies } from "../data/latestmovies"; 
+import { latestMovies } from "../../data/latestmovies"; // from movies/[id] to data
 import Image from "next/image";
 
-export default function MovieDetail({ params }) {
-  const movieId = parseInt(params.id, 10);
-  const movie = latestmovies.find((m) => m.id === movieId);
+export default async function MovieDetail({ params }) {
+  const movieId = parseInt(params.id);
+  const movie = latestMovies.find((m) => m.id === movieId);
 
   if (!movie) {
     return (
@@ -30,14 +27,8 @@ export default function MovieDetail({ params }) {
           height={600}
           className="rounded-lg"
         />
-        <h2 className="text-2xl font-bold text-red-500 mt-4">{movie.title}</h2>
-        <p className="mt-2">{movie.description}</p>
-        <p className="mt-2 text-gray-400">
-          <span className="font-semibold text-red-500">Genre:</span> {movie.genre}
-        </p>
-        <p className="mt-1 text-yellow-400 font-semibold">
-          ⭐ {movie.rating}
-        </p>
+        <h2 className="text-2xl font-bold text-red-500">{movie.title}</h2>
+        <p>{movie.description}</p>
       </main>
       <Footer />
     </div>
