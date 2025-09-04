@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
-  const data = await prisma.genre.findMany({ orderBy: { name: "asc" } });
-  return NextResponse.json(data);
+  try {
+    const genres = await prisma.genre.findMany();
+    return NextResponse.json(genres, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to fetch genres." }, { status: 500 });
+  }
 }

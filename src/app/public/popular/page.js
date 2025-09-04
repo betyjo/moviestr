@@ -1,0 +1,25 @@
+import NavBar from "../../components/NavBar";
+import Footer from "../../components/footer";
+import { latestMovies } from "../../components/latestmovies";
+import MovieCard from "../../components/MovieCard";
+
+export default function PopularPage() {
+  // Sort by rating descending for "popular"
+  const popularMovies = [...latestMovies].sort((a, b) => b.rating - a.rating);
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      <NavBar />
+      <main className="p-6 flex-1 max-w-6xl mx-auto">
+        <h1 className="text-3xl text-red-500 mb-6">Popular Movies</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {popularMovies.map((m) => (
+            <MovieCard key={m.id} m={m} />
+          ))}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
